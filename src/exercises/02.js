@@ -7,7 +7,7 @@ class Toggle extends React.Component {
   // you can create function components as static properties!
   // for example:
   // static Candy = (props) => <div>CANDY! {props.children}</div>
-  // Then that could be used like: <Toggle.Candy />
+  // Then that could be used like: <Toggle.Candy>hello candy shop</Toggle.Candy>
   // This is handy because it makes the relationship between the
   // parent Toggle component and the child Candy component more explicit
   // 🐨 You'll need to create three such components here: On, Off, and Button
@@ -16,12 +16,30 @@ class Toggle extends React.Component {
   //    be able to accept `on`, `toggle`, and `children` as props.
   //    Note that they will _not_ have access to Toggle instance properties
   //    like `this.state.on` or `this.toggle`.
+
   state = {on: false}
+
   toggle = () =>
     this.setState(
       ({on}) => ({on: !on}),
       () => this.props.onToggle(this.state.on),
     )
+    
+  static On = (props) => {
+    if(props.on)
+      return <div>{props.children}</div>
+    return null;
+  };
+
+  static Off = (props) => {
+    if(!props.on)
+      return <div>{props.children}</div>
+    return null;
+  };
+
+  static Button = (props) => {
+    return (<Switch on={props.on} onClick={props.toggle} />);
+  };
   render() {
     // we're trying to let people render the components they want within the Toggle component.
     // But the On, Off, and Button components will need access to the internal `on` state as
@@ -33,8 +51,14 @@ class Toggle extends React.Component {
     // 2. React.cloneElement: https://reactjs.org/docs/react-api.html#cloneelement
     //
     // 🐨 you'll want to completely replace the code below with the above logic.
-    const {on} = this.state
-    return <Switch on={on} onClick={this.toggle} />
+        return (
+          <div>
+          {React.Children.map(this.props.children, child => {
+            return React.cloneElement(child, {
+              on: this.state.on, toggle: this.toggle })   
+         })}
+         </div>
+       )
   }
 }
 
