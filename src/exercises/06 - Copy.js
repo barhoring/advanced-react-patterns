@@ -13,6 +13,8 @@ import {Switch} from '../switch'
 // with the ones we need to get our toggle functionality to work
 //
 // 💰 Here's a little utility that might come in handy
+
+// for each function in fns replace in a new function
 const callAll = (...fns) => (...args) => fns.forEach(fn => fn && fn(...args))
 
 class Toggle extends React.Component {
@@ -22,15 +24,21 @@ class Toggle extends React.Component {
       ({on}) => ({on: !on}),
       () => this.props.onToggle(this.state.on),
     )
-  getTogglerProps = (props) => (
-    {...props, onClick: callAll(this.toggle, props.onClick), 'aria-expanded': this.state.on }
-  )
   getStateAndHelpers() {
     return {
       on: this.state.on,
       toggle: this.toggle,
-      getTogglerProps: this.getTogglerProps
-    }
+      getTogglerProps: (props) => {
+        const defaultProps = { 'aria-expanded': this.state.on, onClick: this.toggle }; 
+        const keys = Object.keys(defaultProps).filter(el => el in props);
+        const reducer = (result, key) => {
+          return {...result, [key]: callAll(props[key], defaultProps[key]) }
+        };
+        const fns = keys.reduce(reducer, {});
+        const newProps = { ...defaultProps, ...props, ...fns };
+        return newProps;
+      }
+    };
   }
   render() {
     return this.props.children(this.getStateAndHelpers())
